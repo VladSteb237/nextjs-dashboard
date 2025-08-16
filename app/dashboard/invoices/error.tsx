@@ -2,7 +2,6 @@
 import React from "react";
 
 const error = ({
-  error,
   reset,
 }: {
   error: Error & { digest?: string };
