@@ -6,7 +6,6 @@ import { redirect } from "next/navigation";
 import { treeifyError } from "./utils";
 import { signIn } from "@/auth";
 import { AuthError } from "next-auth";
-import { ca } from "zod/locales";
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: "require" });
 
@@ -101,8 +100,8 @@ export const updateInvoice = async (
     WHERE id = ${id}
   `;
   } catch (error) {
+    console.log(error);
     return { message: "Database Error: Failed to Update Invoice." };
-    //console.log(error);
   }
   revalidatePath("/dashboard/invoices");
   redirect("/dashboard/invoices");
@@ -115,6 +114,7 @@ export const deleteInvoice = async (id: string) => {
     revalidatePath("/dashboard/invoices");
     return { message: "Deleted Invoice." };
   } catch (error) {
+    console.log(error);
     return { message: "Database Error: Failed to Delete Invoice." };
   }
 };
