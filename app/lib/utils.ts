@@ -1,21 +1,23 @@
-import { Revenue } from './definitions';
+import { Revenue } from "./definitions";
+import z, { ZodError } from "zod";
+import type { FormSchemaType } from "./actions";
 
 export const formatCurrency = (amount: number) => {
-  return (amount / 100).toLocaleString('en-US', {
-    style: 'currency',
-    currency: 'USD',
+  return (amount / 100).toLocaleString("en-US", {
+    style: "currency",
+    currency: "USD",
   });
 };
 
 export const formatDateToLocal = (
   dateStr: string,
-  locale: string = 'en-US',
+  locale: string = "en-US"
 ) => {
   const date = new Date(dateStr);
   const options: Intl.DateTimeFormatOptions = {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
+    day: "numeric",
+    month: "short",
+    year: "numeric",
   };
   const formatter = new Intl.DateTimeFormat(locale, options);
   return formatter.format(date);
@@ -45,13 +47,13 @@ export const generatePagination = (currentPage: number, totalPages: number) => {
   // If the current page is among the first 3 pages,
   // show the first 3, an ellipsis, and the last 2 pages.
   if (currentPage <= 3) {
-    return [1, 2, 3, '...', totalPages - 1, totalPages];
+    return [1, 2, 3, "...", totalPages - 1, totalPages];
   }
 
   // If the current page is among the last 3 pages,
   // show the first 2, an ellipsis, and the last 3 pages.
   if (currentPage >= totalPages - 2) {
-    return [1, 2, '...', totalPages - 2, totalPages - 1, totalPages];
+    return [1, 2, "...", totalPages - 2, totalPages - 1, totalPages];
   }
 
   // If the current page is somewhere in the middle,
@@ -59,11 +61,72 @@ export const generatePagination = (currentPage: number, totalPages: number) => {
   // another ellipsis, and the last page.
   return [
     1,
-    '...',
+    "...",
     currentPage - 1,
     currentPage,
     currentPage + 1,
-    '...',
+    "...",
     totalPages,
   ];
 };
+///////////////////////////////////////////////////////////
+export function treeifyError(err: ZodError): Record<string, any> {
+  const format = err.format(); // ✅ fix deprecation
+
+  const walk = (node: any): any => {
+    if (Array.isArray(node)) return node.map(walk);
+
+    if (node && typeof node === "object") {
+      if ("_errors" in node && Object.keys(node).length === 1) {
+        return node._errors;
+      }
+
+      const result: Record<string, any> = {};
+      for (const [key, val] of Object.entries(node)) {
+        if (key !== "_errors") {
+          const child = walk(val);
+          if (child !== undefined) result[key] = child;
+        }
+      }
+      if (node._errors && node._errors.length > 0) {
+        result._errors = node._errors;
+      }
+      return result;
+    }
+    return node;
+  };
+  return walk(format);
+}
+///////////////////////////////////////////////////////////
+// export function treeifyError<T>(err: z.ZodError<T>): Record<string, any> {
+//   const format = z.treeifyError(err); // ✅ no deprecation warning
+
+//   const walk = (node: any): any => {
+//     if (Array.isArray(node)) return node.map(walk);
+
+//     if (node && typeof node === "object") {
+//       if ("_errors" in node && Object.keys(node).length === 1) {
+//         return node._errors;
+//       }
+
+//       const result: Record<string, any> = {};
+//       for (const [key, val] of Object.entries(node)) {
+//         if (key !== "_errors") {
+//           const child = walk(val);
+//           if (child !== undefined) result[key] = child;
+//         }
+//       }
+
+//       if (node._errors && node._errors.length > 0) {
+//         result._errors = node._errors;
+//       }
+
+//       return result;
+//     }
+
+//     return node;
+//   };
+
+//   return walk(format);
+// }
+///////////////////////////////////////////////////////////
