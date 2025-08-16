@@ -5,7 +5,7 @@ import React from "react";
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Edit Invoice",
 };
 
