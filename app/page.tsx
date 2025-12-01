@@ -32,6 +32,7 @@ export default function Page() {
             src="/hero-desktop.png"
             width={1000}
             height={760}
+            loading="eager"
             className="hidden md:block"
             alt="Screenshots of the dashboard project showing desktop version"
           />
@@ -39,6 +40,7 @@ export default function Page() {
             src="/hero-mobile.png"
             width={560}
             height={620}
+            loading="eager"
             className="block md:hidden"
             alt="Screenshot of the dashboard project showing mobile version"
           />
