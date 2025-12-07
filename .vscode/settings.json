@@ -1,3 +1,9 @@
 {
-  "cSpell.words": ["lusitana"]
+  "cSpell.words": [
+    "Buttontoast",
+    "lusitana"
+  ],
+  "html.customData": [
+    "@capsule/components/capsule-button/vscode.data.json"
+  ]
 }
