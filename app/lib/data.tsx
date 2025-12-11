@@ -1,11 +1,13 @@
 import postgres from "postgres";
 import {
   CustomerField,
-  CustomersTableType,
+  FormattedCustomersTable,
   InvoiceForm,
   InvoicesTable,
   LatestInvoiceRaw,
   Revenue,
+  CustomerForm,
+  CustomersTableType,
 } from "./definitions";
 import { formatCurrency } from "./utils";
 
@@ -142,6 +144,27 @@ export async function fetchInvoicesPages(query: string) {
   }
 }
 
+export async function fetchCustomersPages(query: string) {
+  try {
+    const data = await sql`SELECT COUNT(*)
+    FROM customers
+    WHERE
+      name ILIKE ${`%${query}%`} OR
+      email ILIKE ${`%${query}%`}
+  `;
+    // 2. Получаем общее количество строк (клиентов)
+    const totalCustomers = Number(data[0].count) || 0;
+    // 3. Рассчитываем общее количество страниц.
+    // Используем Math.ceil, чтобы округлить дробное число страниц вверх
+    // (например, 11 клиентов при 10 на странице - это 2 страницы).
+    const numberOfPages = Math.ceil(totalCustomers / ITEMS_PER_PAGE);
+    return numberOfPages;
+  } catch (error) {
+    console.error("Database Error:", error);
+    throw new Error("Failed to fetch total number of customers.");
+  }
+}
+
 export async function fetchInvoiceById(id: string) {
   try {
     const data = await sql<InvoiceForm[]>`
@@ -184,35 +207,63 @@ export async function fetchCustomers() {
   }
 }
 
-export async function fetchFilteredCustomers(query: string) {
+export async function fetchFilteredCustomers(
+  query: string,
+  currentPage: number
+) {
+  // Рассчитываем, сколько записей нужно пропустить (смещение/offset)
+  const offset = (currentPage - 1) * ITEMS_PER_PAGE;
   try {
-    const data = await sql<CustomersTableType[]>`
-		SELECT
-		  customers.id,
-		  customers.name,
-		  customers.email,
-		  customers.image_url,
-		  COUNT(invoices.id) AS total_invoices,
-		  SUM(CASE WHEN invoices.status = 'pending' THEN invoices.amount ELSE 0 END) AS total_pending,
-		  SUM(CASE WHEN invoices.status = 'paid' THEN invoices.amount ELSE 0 END) AS total_paid
-		FROM customers
-		LEFT JOIN invoices ON customers.id = invoices.customer_id
-		WHERE
-		  customers.name ILIKE ${`%${query}%`} OR
+    // Используем сложный SQL-запрос для выборки данных клиентов,
+    // подсчета их счетов (pending/paid) и применения фильтрации и пагинации
+    const data = await sql<FormattedCustomersTable[]>`
+      SELECT
+        customers.id,
+        customers.name,
+        customers.email,
+        customers.image_url,
+        COUNT(invoices.id) AS total_invoices,
+        SUM(CASE WHEN invoices.status = 'pending' THEN invoices.amount ELSE 0 END) AS total_pending,
+        SUM(CASE WHEN invoices.status = 'paid' THEN invoices.amount ELSE 0 END) AS total_paid
+      FROM customers
+      LEFT JOIN invoices ON customers.id = invoices.customer_id
+      WHERE
+        customers.name ILIKE ${`%${query}%`} OR
         customers.email ILIKE ${`%${query}%`}
-		GROUP BY customers.id, customers.name, customers.email, customers.image_url
-		ORDER BY customers.name ASC
-	  `;
+      GROUP BY customers.id, customers.name, customers.email, customers.image_url
+      ORDER BY customers.name ASC
+      LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset}
+    `;
 
-    const customers = data.map((customer) => ({
-      ...customer,
-      total_pending: formatCurrency(customer.total_pending),
-      total_paid: formatCurrency(customer.total_paid),
-    }));
-
+    // При необходимости, здесь можно отформатировать данные (например, суммы в валюту),
+    // хотя в туториале Next.js это часто делается в другом месте.
+    const customers = data;
     return customers;
   } catch (err) {
     console.error("Database Error:", err);
-    throw new Error("Failed to fetch customer table.");
+    throw new Error("Failed to fetch filtered customers.");
+  }
+}
+
+// import { CustomerForm } from './definitions';
+
+export async function fetchCustomerById(id: string) {
+  try {
+    const data = await sql<CustomerForm[]>`
+      SELECT
+        id,
+        name,
+        email,
+        image_url
+      FROM customers
+      WHERE id = ${id}
+    `;
+
+    const customer = data[0];
+    return customer;
+  } catch (error) {
+    console.error("Database Error:", error);
+    // throw new Error('Failed to fetch customer.');
+    return undefined; // Возвращаем undefined, чтобы notFound() сработал
   }
 }

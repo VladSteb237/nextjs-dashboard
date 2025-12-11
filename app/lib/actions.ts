@@ -28,6 +28,12 @@ const FormSchema = z.object({
   }),
   date: z.string(),
 });
+const CustomerSchema = z.object({
+  id: z.string(),
+  name: z.string().min(2, { message: "Please enter a name." }),
+  email: z.string().email({ message: "Please enter a valid email address." }),
+  image_url: z.string().url({ message: "Please enter a valid image URL." }),
+});
 
 export type State = {
   errors?: {
@@ -40,6 +46,88 @@ export type State = {
 
 const CreateInvoice = FormSchema.omit({ id: true, date: true });
 const UpdateInvoice = FormSchema.omit({ id: true, date: true });
+// Схема для создания (без id)
+const CreateCustomer = CustomerSchema.omit({ id: true });
+// Схема для обновления (включает id для идентификации записи)
+const UpdateCustomer = CustomerSchema.omit({ id: true });
+
+export async function createCustomer(prevState: State, formData: FormData) {
+  // 1. Валидация данных формы с помощью Zod
+  const validatedFields = CreateCustomer.safeParse({
+    name: formData.get("name"),
+    email: formData.get("email"),
+    image_url: formData.get("image_url"),
+  });
+
+  // Если валидация не пройдена, вернуть ошибку
+  if (!validatedFields.success) {
+    // В реальном приложении здесь обрабатываются ошибки валидации UI
+    console.error(validatedFields.error.flatten().fieldErrors);
+    return {
+      errors: validatedFields.error.flatten().fieldErrors,
+      message: "Missing Fields. Failed to Create Customer.",
+    };
+  }
+
+  const { name, email, image_url } = validatedFields.data;
+
+  // 2. Вставка данных в базу данных
+  try {
+    await sql`
+      INSERT INTO customers (name, email, image_url)
+      VALUES (${name}, ${email}, ${image_url})
+    `;
+  } catch (error) {
+    return {
+      message: "Database Error: Failed to Create Customer.",
+    };
+  }
+
+  // 3. Ревалидация кэша и перенаправление
+  // Очищает кэш для страницы списка клиентов, чтобы новый клиент сразу появился
+  revalidatePath("/dashboard/customers");
+  // Перенаправляет пользователя обратно на страницу клиентов
+  redirect("/dashboard/customers");
+}
+
+export async function updateCustomer(
+  id: string,
+  prevState: State,
+  formData: FormData
+) {
+  // 1. Валидация данных формы
+  const validatedFields = UpdateCustomer.safeParse({
+    name: formData.get("name"),
+    email: formData.get("email"),
+    image_url: formData.get("image_url"),
+  });
+
+  if (!validatedFields.success) {
+    return {
+      errors: validatedFields.error.flatten().fieldErrors,
+      message: "Missing Fields. Failed to Update Customer.",
+    };
+  }
+
+  const { name, email, image_url } = validatedFields.data;
+
+  // 2. Обновление данных в базе данных
+  try {
+    await sql`
+      UPDATE customers
+      SET name = ${name}, email = ${email}, image_url = ${image_url}
+      WHERE id = ${id}
+    `;
+  } catch (error) {
+    return {
+      message: "Database Error: Failed to Update Customer.",
+    };
+  }
+  // 3. Ревалидация кэша и перенаправление
+  revalidatePath("/dashboard/customers");
+  //revalidatePath(`/dashboard/customers/${id}/edit`); // Также ревалидируем текущую страницу
+  redirect("/dashboard/customers");
+}
 
 export async function createInvoice(prevState: State, formData: FormData) {
   const validatedFields = CreateInvoice.safeParse({
@@ -113,8 +201,11 @@ export async function updateInvoice(
 export async function deleteInvoice(id: string) {
   //throw new Error("Failed to Delete Invoice");
   await sql`DELETE FROM invoices WHERE id = ${id}`;
-
   revalidatePath("/dashboard/invoices");
+}
+export async function deleteCustomer(id: string) {
+  await sql`DELETE FROM customers WHERE id = ${id}`;
+  revalidatePath("/dashboard/customers");
 }
 
 export async function authenticate(

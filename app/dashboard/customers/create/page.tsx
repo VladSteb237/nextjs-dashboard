@@ -1,0 +1,23 @@
+import Breadcrumbs from "@/app/ui/invoices/breadcrumbs";
+import Form from "@/app/ui/customers/create-form";
+
+const CreateCustomers = () => {
+  return (
+    <main>
+      <Breadcrumbs
+        breadcrumbs={[
+          { label: "Customers", href: "/dashboard/customers" },
+          {
+            label: "Create Customer",
+            href: "/dashboard/customers/create",
+            active: true,
+          },
+        ]}
+      />
+      {/* Передаем серверное действие в компонент формы */}
+      <Form />
+    </main>
+  );
+};
+
+export default CreateCustomers;
