@@ -27,16 +27,13 @@ const FormSchema = z.object({
     invalid_type_error: "Please select an invoice status.",
   }),
   date: z.string(),
+});
+const CustomerSchema = z.object({
+  id: z.string(),
   name: z.string().min(2, { message: "Please enter a name." }),
   email: z.string().email({ message: "Please enter a valid email address." }),
   image_url: z.string().url({ message: "Please enter a valid image URL." }),
 });
-// const CustomerSchema = z.object({
-//   id: z.string(),
-//   name: z.string().min(2, { message: "Please enter a name." }),
-//   email: z.string().email({ message: "Please enter a valid email address." }),
-//   image_url: z.string().url({ message: "Please enter a valid image URL." }),
-// });
 
 export type State = {
   errors?: {
@@ -50,9 +47,9 @@ export type State = {
 const CreateInvoice = FormSchema.omit({ id: true, date: true });
 const UpdateInvoice = FormSchema.omit({ id: true, date: true });
 // Схема для создания (без id)
-const CreateCustomer = FormSchema.omit({ id: true });
+const CreateCustomer = CustomerSchema.omit({ id: true });
 // Схема для обновления (включает id для идентификации записи)
-const UpdateCustomer = FormSchema.omit({ id: true });
+const UpdateCustomer = CustomerSchema.omit({ id: true });
 
 export async function createCustomer(prevState: State, formData: FormData) {
   // 1. Валидация данных формы с помощью Zod
@@ -89,7 +86,6 @@ export async function createCustomer(prevState: State, formData: FormData) {
   // 3. Ревалидация кэша и перенаправление
   // Очищает кэш для страницы списка клиентов, чтобы новый клиент сразу появился
   revalidatePath("/dashboard/customers"), { cache: "no-store" };
-  revalidatePath("/dashboard/invoices"), { cache: "no-store" }; // Также ревалидируем страницу создания клиента
   // Перенаправляет пользователя обратно на страницу клиентов
   redirect("/dashboard/customers");
 }
@@ -119,7 +115,7 @@ export async function updateCustomer(
   try {
     await sql`
       UPDATE customers
-      SET name = ${name}, email = ${email}, image_url = ${image_url}
+      SET name = name =${name}, email = ${email}, image_url = ${image_url}
       WHERE id = ${id}
     `;
   } catch (error) {

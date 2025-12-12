@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 import postgres from "postgres";
 import {
   CustomerField,
@@ -7,7 +9,6 @@ import {
   LatestInvoiceRaw,
   Revenue,
   CustomerForm,
-  CustomersTableType,
 } from "./definitions";
 import { formatCurrency } from "./utils";
 
