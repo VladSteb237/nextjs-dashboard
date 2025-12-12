@@ -27,13 +27,16 @@ const FormSchema = z.object({
     invalid_type_error: "Please select an invoice status.",
   }),
   date: z.string(),
-});
-const CustomerSchema = z.object({
-  id: z.string(),
   name: z.string().min(2, { message: "Please enter a name." }),
   email: z.string().email({ message: "Please enter a valid email address." }),
   image_url: z.string().url({ message: "Please enter a valid image URL." }),
 });
+// const CustomerSchema = z.object({
+//   id: z.string(),
+//   name: z.string().min(2, { message: "Please enter a name." }),
+//   email: z.string().email({ message: "Please enter a valid email address." }),
+//   image_url: z.string().url({ message: "Please enter a valid image URL." }),
+// });
 
 export type State = {
   errors?: {
@@ -47,9 +50,9 @@ export type State = {
 const CreateInvoice = FormSchema.omit({ id: true, date: true });
 const UpdateInvoice = FormSchema.omit({ id: true, date: true });
 // Схема для создания (без id)
-const CreateCustomer = CustomerSchema.omit({ id: true });
+const CreateCustomer = FormSchema.omit({ id: true });
 // Схема для обновления (включает id для идентификации записи)
-const UpdateCustomer = CustomerSchema.omit({ id: true });
+const UpdateCustomer = FormSchema.omit({ id: true });
 
 export async function createCustomer(prevState: State, formData: FormData) {
   // 1. Валидация данных формы с помощью Zod
