@@ -85,7 +85,8 @@ export async function createCustomer(prevState: State, formData: FormData) {
 
   // 3. Ревалидация кэша и перенаправление
   // Очищает кэш для страницы списка клиентов, чтобы новый клиент сразу появился
-  revalidatePath("/dashboard/customers");
+  revalidatePath("/dashboard/customers"), { cache: "no-store" };
+  revalidatePath("/dashboard/invoices"), { cache: "no-store" }; // Также ревалидируем страницу создания клиента
   // Перенаправляет пользователя обратно на страницу клиентов
   redirect("/dashboard/customers");
 }
