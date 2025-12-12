@@ -124,7 +124,7 @@ export async function updateCustomer(
     };
   }
   // 3. Ревалидация кэша и перенаправление
-  revalidatePath("/dashboard/customers");
+  revalidatePath("/dashboard/customers"), { cache: "no-store" };
   //revalidatePath(`/dashboard/customers/${id}/edit`); // Также ревалидируем текущую страницу
   redirect("/dashboard/customers");
 }
@@ -194,7 +194,7 @@ export async function updateInvoice(
     console.error(error);
     return { message: "Database Error: Failed to Update Invoice." };
   }
-  revalidatePath("/dashboard/invoices");
+  revalidatePath("/dashboard/invoices"), { cache: "no-store" };
   redirect("/dashboard/invoices");
 }
 
