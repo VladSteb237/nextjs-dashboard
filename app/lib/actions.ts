@@ -184,12 +184,11 @@ export async function updateInvoice(
   const { customerId, amount, status } = validatedFields.data;
   const amountInCents = amount * 100;
   try {
-    const updatedInvoice = await sql`
+    await sql`
         UPDATE invoices
         SET customer_id = ${customerId}, amount = ${amountInCents}, status = ${status}
         WHERE id = ${id}
       `;
-    return updatedInvoice;
   } catch (error) {
     // We'll also log the error to the console for now
     console.error(error);
