@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 import SideNav from "@/app/ui/dashboard/sidenav";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
