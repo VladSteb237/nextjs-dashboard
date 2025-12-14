@@ -133,16 +133,16 @@ const team = [
   {
     name: "Maria Lee",
     role: "Design Director",
-    image: "/team/teams-3.jpg",
+    image: "/team/teams-3.png",
   },
   {
     name: "Daniel Smith",
     role: "Frontend Engineer",
-    image: "/team/teams-2.jpg",
+    image: "/team/teams-2.png",
   },
   {
     name: "Sophia Brown",
     role: "Backend Engineer",
-    image: "/team/team-4.jpg",
+    image: "/team/team-4.png",
   },
 ];
