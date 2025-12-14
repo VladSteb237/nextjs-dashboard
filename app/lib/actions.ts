@@ -32,7 +32,10 @@ const CustomerSchema = z.object({
   id: z.string(),
   name: z.string().min(2, { message: "Please enter a name." }),
   email: z.string().email({ message: "Please enter a valid email address." }),
-  image_url: z.string().url({ message: "Please enter a valid image URL." }),
+  image_url: z.string().url({
+    message:
+      "Please enter a valid image URL. avatarko.ru and images.pexels.com are supported",
+  }),
 });
 
 export type State = {
@@ -44,6 +47,15 @@ export type State = {
   message?: string | null;
 };
 
+export type StateCustomer = {
+  errors?: {
+    name?: string[];
+    email?: string[];
+    image_url?: string[];
+  };
+  message?: string | null;
+};
+
 const CreateInvoice = FormSchema.omit({ id: true, date: true });
 const UpdateInvoice = FormSchema.omit({ id: true, date: true });
 // Схема для создания (без id)
@@ -51,7 +63,10 @@ const CreateCustomer = CustomerSchema.omit({ id: true });
 // Схема для обновления (включает id для идентификации записи)
 const UpdateCustomer = CustomerSchema.omit({ id: true });
 
-export async function createCustomer(prevState: State, formData: FormData) {
+export async function createCustomer(
+  prevState: StateCustomer,
+  formData: FormData
+) {
   // 1. Валидация данных формы с помощью Zod
   const validatedFields = CreateCustomer.safeParse({
     name: formData.get("name"),
@@ -82,7 +97,6 @@ export async function createCustomer(prevState: State, formData: FormData) {
       message: "Database Error: Failed to Create Customer.",
     };
   }
-
   // 3. Ревалидация кэша и перенаправление
   // Очищает кэш для страницы списка клиентов, чтобы новый клиент сразу появился
   revalidatePath("/dashboard/customers"), { cache: "no-store" };
@@ -92,7 +106,7 @@ export async function createCustomer(prevState: State, formData: FormData) {
 
 export async function updateCustomer(
   id: string,
-  prevState: State,
+  prevState: StateCustomer,
   formData: FormData
 ) {
   // 1. Валидация данных формы
