@@ -16,7 +16,7 @@ export default function EditCustomerForm({
   const updateCustomerWithId = updateCustomer.bind(null, customer.id);
   const [state, formAction] = useActionState(
     updateCustomerWithId,
-    initialState
+    initialState,
   );
 
   // Используем привязанный action в атрибуте формы
@@ -65,22 +65,22 @@ export default function EditCustomerForm({
 
         {/* Поле для URL изображения */}
         <div className="mb-4">
-          <label htmlFor="image_url" className="mb-2 block text-sm font-medium">
-            Image URL
+          <label htmlFor="file" className="mb-2 block text-sm font-medium">
+            Image File
           </label>
           <input
-            id="image_url"
-            name="image_url"
-            type="url"
+            id="image"
+            name="image"
+            type="file"
             aria-describedby="customer-error"
-            // defaultValue={customer.image_url}
-            placeholder="https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg"
+            placeholder="Enter image File"
             className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
+            //required
           />
         </div>
         <div id="customer-error" aria-live="polite" aria-atomic="true">
-          {state.errors?.image_url &&
-            state.errors.image_url.map((error: string) => (
+          {state.errors?.imageFile &&
+            state.errors.imageFile.map((error: string) => (
               <p className="mt-2 text-sm text-red-500" key={error}>
                 {error}
               </p>

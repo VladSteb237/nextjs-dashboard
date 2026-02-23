@@ -80,7 +80,7 @@ export default function MissionPage() {
           Whether you are a developer, designer, or product leader — Acme helps
           you build better software, together.
         </p>
-        <Button size="lg" className="rounded-2xl">
+        <Button size="lg" className="rounded-2xl dark:text-white">
           <Link href="/">Get Started</Link>
         </Button>
       </section>

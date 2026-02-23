@@ -92,7 +92,7 @@ export async function fetchCardData() {
 const ITEMS_PER_PAGE = 6;
 export async function fetchFilteredInvoices(
   query: string,
-  currentPage: number
+  currentPage: number,
 ) {
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
 
@@ -210,31 +210,29 @@ export async function fetchCustomers() {
 
 export async function fetchFilteredCustomers(
   query: string,
-  currentPage: number
+  currentPage: number,
 ) {
   // Рассчитываем, сколько записей нужно пропустить (смещение/offset)
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
   try {
-    // Используем сложный SQL-запрос для выборки данных клиентов,
-    // подсчета их счетов (pending/paid) и применения фильтрации и пагинации
     const data = await sql<FormattedCustomersTable[]>`
-      SELECT
-        customers.id,
-        customers.name,
-        customers.email,
-        customers.image_url,
-        COUNT(invoices.id) AS total_invoices,
-        SUM(CASE WHEN invoices.status = 'pending' THEN invoices.amount ELSE 0 END) AS total_pending,
-        SUM(CASE WHEN invoices.status = 'paid' THEN invoices.amount ELSE 0 END) AS total_paid
-      FROM customers
-      LEFT JOIN invoices ON customers.id = invoices.customer_id
-      WHERE
-        customers.name ILIKE ${`%${query}%`} OR
-        customers.email ILIKE ${`%${query}%`}
-      GROUP BY customers.id, customers.name, customers.email, customers.image_url
-      ORDER BY customers.name ASC
-      LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset}
-    `;
+  SELECT
+    customers.id,
+    customers.name,
+    customers.email,
+    COALESCE(customers.image_url, '/default-avatar.png') AS image_url,
+    COUNT(invoices.id) AS total_invoices,
+    SUM(CASE WHEN invoices.status = 'pending' THEN invoices.amount ELSE 0 END) AS total_pending,
+    SUM(CASE WHEN invoices.status = 'paid' THEN invoices.amount ELSE 0 END) AS total_paid
+  FROM customers
+  LEFT JOIN invoices ON customers.id = invoices.customer_id
+  WHERE
+    customers.name ILIKE ${`%${query}%`} OR
+    customers.email ILIKE ${`%${query}%`}
+  GROUP BY customers.id, customers.name, customers.email, customers.image_url
+  ORDER BY customers.name ASC
+  LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset}
+`;
 
     // При необходимости, здесь можно отформатировать данные (например, суммы в валюту),
     // хотя в туториале Next.js это часто делается в другом месте.
@@ -245,8 +243,6 @@ export async function fetchFilteredCustomers(
     throw new Error("Failed to fetch filtered customers.");
   }
 }
-
-// import { CustomerForm } from './definitions';
 
 export async function fetchCustomerById(id: string) {
   try {

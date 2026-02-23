@@ -10,7 +10,7 @@ export default function AboutPage() {
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/40">
       {/* Hero */}
       <section className="relative overflow-hidden">
-        <div className="container mx-auto px-6 py-24 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        {/* <div className="container mx-auto px-6 py-24 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -42,6 +42,36 @@ export default function AboutPage() {
               priority
             />
           </motion.div>
+        </div> */}
+        <div className="flex flex-col items-start">
+          <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-6">
+            About <span className="text-primary">Acme</span>
+          </h1>
+
+          <p className="text-lg text-muted-foreground mb-8 max-w-xl">
+            Acme is a modern Next.js application focused on speed, clarity, and
+            delightful user experience. We build tools that help teams move
+            faster and ship with confidence.
+          </p>
+
+          <Button
+            size="lg"
+            className="rounded-2xl w-full sm:w-auto sm:px-12 dark:text-white"
+            asChild>
+            <Link href="/dashboard/about/mission">Our Mission</Link>
+          </Button>
+
+          {/* IMAGE BELOW */}
+          <div className="mt-12 w-full">
+            {/* <Image
+              src="/about-hero.png"
+              alt="Acme App Interface"
+              width={620}
+              height={480}
+              className="w-full max-w-3xl rounded-2xl shadow-xl"
+              priority
+            /> */}
+          </div>
         </div>
       </section>
 
@@ -98,7 +128,10 @@ export default function AboutPage() {
           Join thousands of developers using Acme to create fast, reliable, and
           beautiful web applications.
         </p>
-        <Button size="lg" variant="default" className="rounded-2xl">
+        <Button
+          size="lg"
+          variant="default"
+          className="rounded-2xl dark:text-white">
           <Link href="/">Get Started</Link>
         </Button>
       </section>
